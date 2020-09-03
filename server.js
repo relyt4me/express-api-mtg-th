@@ -36,7 +36,7 @@ app.locals.cards = [
 app.get('/api/v1/cards', (request, response) => {
   const cards = app.locals.cards;
 
-  response.json({ cards });
+  response.status(200).json({ cards });
 });
 
 app.get('/api/v1/cards/:id', (request, response) => {
@@ -50,6 +50,21 @@ app.get('/api/v1/cards/:id', (request, response) => {
   }
 
   response.status(200).json(matchingCard);
+});
+
+app.post('/api/v1/cards', (request, response) => {
+  const id = Date.now();
+  const givenCard = request.body;
+  for (let requiredParameter of ['title', 'castingCost', 'color', 'type', 'subtype', 'textBox']) {
+    if (!givenCard[requiredParameter]) {
+      return response.status(422).send({ error: `You're missing a "${requiredParameter}" property.` });
+    }
+  }
+
+  const { title, castingCost, color, type, subtype, textBox } = request.body;
+  app.locals.cards.push({ id, title, castingCost, color, type, subtype, textBox });
+
+  response.status(201).json({ id, title, castingCost, color, type, subtype, textBox });
 });
 
 app.listen(app.get('port'), () => {
